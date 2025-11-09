@@ -4,10 +4,12 @@ import axios from "axios";
 // NOTE: In a real environment, HELIUS_API_KEY should be loaded securely from process.env
 const network = "devnet"; // "devnet" or "mainnet"
 
-export const HELIUS_BASE =
-  network === "devnet"
-    ? "https://api-devnet.helius.xyz/v0"
-    : "https://api.helius.xyz/v0";
+export const HELIUS_BASE = "https://api.helius.xyz/v0";
+
+// Create axios instance with increased timeout for Helius API calls
+const heliusAxios = axios.create({
+  timeout: 60000, // 60 seconds timeout for Helius API calls
+});
     
     /**
      * Fetches and decodes a single transaction signature using Helius Enhanced API.
@@ -21,7 +23,7 @@ export const HELIUS_BASE =
     }
   const url = `${HELIUS_BASE}/transactions/?api-key=${HELIUS_API_KEY}`;
   try {
-    const { data } = await axios.post(url, {
+    const { data } = await heliusAxios.post(url, {
       transactions: [signature],
     });
     return data[0];
@@ -49,7 +51,7 @@ export const getAddressHistory = async (address: string, beforeSignature: string
     const url = `${HELIUS_BASE}/addresses/${address}/transactions?api-key=${HELIUS_API_KEY}&limit=20${beforeQuery}`;
     
     try {
-        const { data } = await axios.get(url);
+        const { data } = await heliusAxios.get(url);
         return data;
     } catch (err) {
         console.warn(`⚠️ Could not fetch transaction history for ${address}`);
